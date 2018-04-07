@@ -21,12 +21,28 @@ using namespace std;
 void merge_sort_split(int *arr1, int *arr2, int length) {
   // merge received arrays to the common array and sort it
   int tmp[2*length];
-  copy(arr1, arr1 + length, tmp);
-  copy(arr2, arr2 + length, tmp + length);
-  sort(tmp, tmp + (2*length));
-  // split the sorted arrays back to the subarrays
+  int l = 0;  // left side index
+  int k = 0;  // right side index
+  for (int i = 0; i < 2*length; i++) {
+    if (arr1[l] <= arr2[k]) {
+      tmp[i]=arr1[l];
+      if (l < length-1)  {
+        l++;
+      } else {
+        arr1[l]=INT_MAX;
+      }
+    } else {
+      tmp[i]=arr2[k];
+      if (k < length-1)  {
+        k++;
+      } else {
+        arr2[k]=INT_MAX;
+      }
+    }
+  }
   copy(tmp,tmp + length, arr1);
   copy(tmp + length, tmp + (2*length), arr2);
+
 }
 
 int main(int argc, char **argv) {
@@ -72,7 +88,7 @@ int main(int argc, char **argv) {
     fin.close();
   }
   // precausions to make sure that we won't try to address wrong procs
-  int oddlimit = numprocs-1;
+  int oddlimit = 2*(numprocs/2)-1;
   int evenlimit = 2*((numprocs-1)/2);
   // numprocs/2 should be enough cycles to sort array
   int halfcycles = numprocs/2;
@@ -81,8 +97,8 @@ int main(int argc, char **argv) {
   // obtain the subarray (sub_nums) for every proc
   MPI_Scatter(numbers, split_factor, MPI_INT, sub_nums, split_factor, MPI_INT, 0, MPI_COMM_WORLD);
 
-  // Sort Start
-  for (int i = 1; i < halfcycles+1; i++) {
+  for (int i = 1; i < halfcycles+1; i++) { // Sort Start
+      sort(sub_nums, sub_nums + split_factor);
 
       if ((!(myid%2) || myid==0) && (myid<oddlimit)) { // Odd cpu
         int recv[split_factor];
@@ -92,7 +108,7 @@ int main(int argc, char **argv) {
         // send second half to neighbor
         MPI_Send(&recv, split_factor, MPI_INT, myid+1, TAG, MPI_COMM_WORLD);
 
-      } else if(myid<=oddlimit){
+      } else if(myid<=oddlimit) {
         // Send your number to the neigbor
         MPI_Send(&sub_nums, split_factor, MPI_INT, myid-1, TAG, MPI_COMM_WORLD);
         // Wait for the sorted half from him
@@ -107,7 +123,7 @@ int main(int argc, char **argv) {
         // send second half to neighbor
         MPI_Send(&recv, split_factor, MPI_INT, myid+1, TAG, MPI_COMM_WORLD);
 
-      } else if(myid<=evenlimit && myid!=0){
+      } else if(myid<=evenlimit && myid!=0) {
         // Send your number to the neigbor
         MPI_Send(&sub_nums, split_factor, MPI_INT, myid-1, TAG, MPI_COMM_WORLD);
         // Wait for the sorted half from him
