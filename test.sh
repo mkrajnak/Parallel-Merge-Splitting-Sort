@@ -9,7 +9,7 @@ else
     cpus=$2;
 fi;
 
-mpic++ --prefix /usr/local/share/OpenMPI -o mspl merge-splitting.cpp
+mpic++ --prefix /usr/local/share/OpenMPI -o mss mss.cpp
 # Check if translation was successfull to avoid to many err messages
 compile=$?;
 if [[ $compile != 0 ]];then
@@ -20,7 +20,7 @@ fi;
 dd if=/dev/random bs=1 count=$numbers of=numbers &> /dev/null
 
 # Run
-mpirun --prefix /usr/local/share/OpenMPI -np $cpus mspl $numbers;
+mpirun --prefix /usr/local/share/OpenMPI -np $cpus mss $numbers;
 
 # Cleanup
-rm -f oets numbers
+rm -f mss numbers
