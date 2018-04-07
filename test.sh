@@ -1,27 +1,26 @@
 #!/bin/bash
 
-#pocet cisel bud zadam nebo 10 :)
+# Check args
 if [ $# -lt 2 ];then
-    echo "Error";
+    echo "Usage: ./test.sh <count_of_numbers_to_sort> <cpu_count>";
     exit 1;
 else
     numbers=$1;
     cpus=$2;
 fi;
 
-#preklad cpp zdrojaku
 mpic++ --prefix /usr/local/share/OpenMPI -o mspl merge-splitting.cpp
-
+# Check if translation was successfull to avoid to many err messages
 compile=$?;
 if [[ $compile != 0 ]];then
   exit $compile;
 fi;
 
-#vyrobeni souboru s random cisly
-dd if=/dev/random bs=1 count=$numbers of=numbers;
+# Make "file" with random numbers, send output to black hole :O
+dd if=/dev/random bs=1 count=$numbers of=numbers &> /dev/null
 
-#spusteni
+# Run
 mpirun --prefix /usr/local/share/OpenMPI -np $cpus mspl $numbers;
 
-#uklid
+# Cleanup
 rm -f oets numbers
