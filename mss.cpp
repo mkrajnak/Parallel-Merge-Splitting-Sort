@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
   if (myid == 0) {                        // read the file inside 0th proces
     char input[] = "numbers";             // filename
     int number;                           // read number from file
-    int invar = 0;                        // count numbers that are read
+    long long invar = 0;                        // count numbers that are read
     fstream fin;
     fin.open(input, ios::in);
 
@@ -88,10 +88,10 @@ int main(int argc, char **argv) {
     fin.close();
   }
   // precausions to make sure that we won't try to address wrong procs
-  int oddlimit = 2*(numprocs/2)-1;
-  int evenlimit = 2*((numprocs-1)/2);
+  int oddlimit = (int) 2*(numprocs/2)-1;
+  int evenlimit = (int) 2*((numprocs-1)/2);
   // numprocs/2 should be enough cycles to sort array
-  int halfcycles = numprocs/2;
+  int halfcycles =(int) numprocs/2;
   int sub_nums[split_factor]; // initialize subarray for every proc
 
   // obtain the subarray (sub_nums) for every proc
@@ -131,13 +131,12 @@ int main(int argc, char **argv) {
       }
   } // End sort
 
-  int res[tmp_length];
   // Gather the sorted values from each procs subarray to the new array
-  MPI_Gather(sub_nums, split_factor, MPI_INT, res, split_factor, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Gather(sub_nums, split_factor, MPI_INT, numbers, split_factor, MPI_INT, 0, MPI_COMM_WORLD);
 
   if (myid == 0) {  // print the sorted array one per line
-    for (size_t i = 0; i < length; i++) {
-      cout << res[i] << endl;
+    for (long long i = 0; i < length; i++) {
+      cout << numbers[i] << endl;
     }
   }
   MPI_Finalize();
