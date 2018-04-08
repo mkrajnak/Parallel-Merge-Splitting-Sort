@@ -17,7 +17,7 @@ if [[ $compile != 0 ]];then
 fi;
 
 # Make "file" with random numbers, send output to black hole :O
-dd if=/dev/urandom bs=1 count=$numbers of=numbers &> /dev/null
+dd if=/dev/random bs=1 count=$numbers of=numbers &> /dev/null
 
 # Run
 mpirun --prefix /usr/local/share/OpenMPI -np $cpus mss $numbers;
